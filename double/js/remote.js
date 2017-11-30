@@ -9,7 +9,39 @@ const Remote = function (socket) {
         });
         socket.on('next', (data) => {
             game.performNext(data.type, data.dir);
-        })
+        });
+        socket.on('rotate', () => {
+            game.rotate();
+        });
+        socket.on('right', () => {
+            game.right();
+        });
+        socket.on('down', () => {
+            game.down();
+        });
+        socket.on('left', () => {
+            game.left();
+        });
+        socket.on('fall', () => {
+            game.fall();
+        });
+        socket.on('fixed', () => {
+            game.fixed();
+        });
+        socket.on('line', (data) => {
+            game.checkClear();
+            game.addScore(data)
+        });
+        socket.on('time', (data) => {
+            game.checkClear();
+            game.setTime(data)
+        });
+        socket.on('lose', () => {
+            game.gameOver(false);
+        });
+        socket.on('addTailLines', (data) => {
+            game.addTailLines(data);
+        });
     };
 
     //start game

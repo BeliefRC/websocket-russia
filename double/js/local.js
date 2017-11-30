@@ -4,21 +4,26 @@ const Local = function (socket) {
     let game, timer = null, timeCount = 0, time = 0;
 
     //Time interval constant
-    const INTERVAL = 200;
+    const INTERVAL = 2000;
 
     //Binding keyboard events
     const bindKeyEvent = () => {
         document.onkeydown = (e) => {
             if (e.keyCode === 38) {//up
                 game.rotate();
+                socket.emit('rotate');
             } else if (e.keyCode === 39) {//right
-                game.right()
+                game.right();
+                socket.emit('right');
             } else if (e.keyCode === 40) {//down
-                game.down()
+                game.down();
+                socket.emit('down');
             } else if (e.keyCode === 37) {//left
-                game.left()
+                game.left();
+                socket.emit('left');
             } else if (e.keyCode === 32) {//space
-                game.fall()
+                game.fall();
+                socket.emit('fall');
             }
         }
     };
@@ -28,17 +33,31 @@ const Local = function (socket) {
         //下落完成后固定，检查是否需要消行(加分)，检查是否游戏结束，更替方块
         if (!game.down()) {//不能下落了
             game.fixed();
+            socket.emit('fixed');
             const line = game.checkClear();
+            //消行加分
             if (line) {
                 game.addScore(line);
+                socket.emit('line', line);
+                if (line > 1) {
+                    let bottomLines = generateBottomLine(line);
+                    socket.emit('bottomLines', bottomLines);
+                }
             }
             const gameOver = game.checkGameOver();
             if (gameOver) {
                 game.gameOver(false);
+                socket.emit('lose');
+                document.getElementById('remote_game_over').innerHTML = '你赢了';
                 stop();
             } else {
-                game.performNext(generateType(), generateDir());
+                let type = generateType(), dir = generateDir();
+                game.performNext(type, dir);
+                socket.emit('next', {type: type, dir: dir});
+
             }
+        } else {
+            socket.emit('down');
         }
     };
 
@@ -62,9 +81,7 @@ const Local = function (socket) {
             timeCount = 0;
             time++;
             game.setTime(time);
-            if (time % 5 === 0) {
-                game.addTailLines(generateBottomLine(1));
-            }
+            socket.emit('time', time)
         }
     };
 
@@ -101,7 +118,7 @@ const Local = function (socket) {
         let type = generateType(), dir = generateDir();
         game.init(doms, type, dir);
 
-        socket.emit('init', {type:type, dir:type});
+        socket.emit('init', {type: type, dir: dir});
         bindKeyEvent();
         let type1 = generateType(), dir1 = generateDir();
 
@@ -113,6 +130,19 @@ const Local = function (socket) {
     socket.on('start', () => {
         document.getElementById('waiting').innerHTML = '';
         start();
-    })
+    });
+    socket.on('lose', () => {
+        game.gameOver(true);
+        stop();
+    });
+    socket.on('leave', () => {
+        document.getElementById('local_game_over').innerHTML = '对方玩家掉线';
+        document.getElementById('remote_game_over').innerHTML = '已掉线';
+        stop();
+    });
+    socket.on('bottomLines', (data) => {
+        game.addTailLines(data);
+        socket.emit('addTailLines', data);
+    });
 
 };
