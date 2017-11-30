@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>俄罗斯方块</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div>
+    <p>请用方向键来操作游戏</p>
+    <p>&uarr; ::旋转、 &larr; :左移、&rarr; :右移、&darr; :下移、 空格 :坠落</p>
+</div>
+<div class="square" id="local">
+    <div class="title">我的游戏区域</div>
+    <div class="game" id="local_game"></div>
+    <div class="next" id="local_next"></div>
+    <div class="info">
+        <div>已用时：<span id="local_time">0</span>s</div>
+        <div>已得分：<span id="local_score">0</span>分</div>
+        <div class="game_over" id="local_game_over"></div>
+    </div>
+</div>
+
+<script src="js/square.js"></script>
+<script src="js/squareFactory.js"></script>
+<script src="js/game.js"></script>
+<script src="js/local.js"></script>
+<script src="js/remote.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
